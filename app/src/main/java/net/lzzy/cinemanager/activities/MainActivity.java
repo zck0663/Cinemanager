@@ -1,6 +1,8 @@
 package net.lzzy.cinemanager.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +14,8 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 import net.lzzy.cinemanager.R;
+import net.lzzy.cinemanager.fragments.CinemasFragment;
+import net.lzzy.cinemanager.fragments.OrderFragment;
 
 /**
  * @author Administrator
@@ -21,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tvTitle;
     private SearchView search;
     private LinearLayout layoutAddOrder;
+    private FragmentManager manager = getSupportFragmentManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,20 +60,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        layoutMenu.setVisibility(View.GONE);
         switch (v.getId()) {
+
             case R.id.bar_title_tv_add_cinema:
+
                 break;
             case R.id.bar_title_tv_view_cinema:
-                finish();
+                tvTitle.setText("影院列表");
+                manager.beginTransaction()
+                        .replace(R.id.fragment_container, new CinemasFragment())
+                        .commit();
                 break;
             case R.id.bar_title_tv_add_order:
-                layoutAddOrder.setVisibility(View.VISIBLE);
-                layoutMenu.setVisibility(View.GONE);
                 break;
             case R.id.bar_title_tv_view_order:
-                layoutMenu.setVisibility(View.GONE);
+                tvTitle.setText("我的订单");
+                manager.beginTransaction()
+                        .replace(R.id.fragment_container, new OrderFragment())
+                        .commit();
                 break;
-
             default:
                 break;
         }
