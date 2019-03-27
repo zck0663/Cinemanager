@@ -16,15 +16,14 @@ import net.lzzy.cinemanager.R;
  * Created by lzzy_gxy on 2019/3/27.
  * Description:
  */
-public class FragmentAddOrder extends Fragment {
-    public FragmentAddOrder() {
+public class FragmentAddOrder extends BaseFragment {
+    @Override
+    protected void populate() {
+        EditText edt = find(R.id.fragment_add_order_edt);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_add_order, null);
-        EditText editText = view.findViewById(R.id.fragment_add_order_edt);
-        return view;
+    protected int getLayoutRes() {
+        return R.layout.fragment_add_order;
     }
 }
