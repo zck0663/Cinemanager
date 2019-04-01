@@ -1,16 +1,10 @@
 package net.lzzy.cinemanager.fragments;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.ListView;
+
 
 import net.lzzy.cinemanager.R;
 import net.lzzy.cinemanager.models.Cinema;
@@ -31,10 +25,14 @@ public class CinemasFragment extends BaseFragment {
     private CinemaFactory factory = CinemaFactory.getInstance();
     private GenericAdapter<Cinema> adapter;
     private Cinema cinema;
-    public CinemasFragment(){}
-    public CinemasFragment(Cinema cinema){
-        this.cinema=cinema;
+
+    public CinemasFragment() {
     }
+
+    public CinemasFragment(Cinema cinema) {
+        this.cinema = cinema;
+    }
+
     @Override
     protected void populate() {
         lv = find(R.id.activity_cinema_lv);
@@ -42,7 +40,7 @@ public class CinemasFragment extends BaseFragment {
         lv.setEmptyView(empty);
         cinemas = factory.get();
 
-       //适配器
+        //适配器
         adapter = new GenericAdapter<Cinema>(getActivity(), R.layout.cinemas_item, cinemas) {
             @Override
             public void populate(ViewHolder viewHolder, Cinema cinema) {
@@ -61,16 +59,28 @@ public class CinemasFragment extends BaseFragment {
             }
         };
         lv.setAdapter(adapter);
-        if (cinema!=null){
+        if (cinema != null) {
             save(cinema);
         }
     }
-    public void save(Cinema cinema){
+
+    public void save(Cinema cinema) {
         adapter.add(cinema);
     }
 
     @Override
     public int getLayoutRes() {
         return R.layout.fragment_cinemas;
+    }
+
+    @Override
+    public void search(String kw) {
+        cinemas.clear();
+        if (TextUtils.isEmpty(kw)) {
+            cinemas.addAll(factory.get());
+        } else {
+            cinemas.addAll(factory.searchCinemas(kw));
+        }
+        adapter.notifyDataSetChanged();
     }
 }

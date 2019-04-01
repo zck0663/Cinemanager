@@ -5,30 +5,30 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.Window;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 
 import net.lzzy.cinemanager.R;
+import net.lzzy.cinemanager.fragments.BaseFragment;
 import net.lzzy.cinemanager.fragments.CinemasFragment;
 import net.lzzy.cinemanager.fragments.FragmentAddCinemas;
 import net.lzzy.cinemanager.fragments.FragmentAddOrder;
 import net.lzzy.cinemanager.fragments.OnFragmentInteractionListener;
 import net.lzzy.cinemanager.fragments.OrderFragment;
 import net.lzzy.cinemanager.models.Cinema;
+import net.lzzy.cinemanager.utils.ViewUtils;
 
 /**
  * @author Administrator
  */
-public class MainActivity extends AppCompatActivity implements View.OnClickListener ,
+public class MainActivity extends AppCompatActivity implements View.OnClickListener,
 
-        OnFragmentInteractionListener ,FragmentAddCinemas.onCinemaCreatedListener{
+        OnFragmentInteractionListener, FragmentAddCinemas.onCinemaCreatedListener {
     private LinearLayout layoutMenu;
     private TextView tvTitle;
     private SearchView search;
@@ -44,6 +44,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         setTitleMenu();
+        search.setOnQueryTextListener(new ViewUtils.AbstractQueryHandler() {
+            @Override
+            public boolean handleQuery(String kw) {
+                Fragment fragment=manager.findFragmentById(R.id.fragment_container);
+                    if (fragment!=null){
+                        if (fragment instanceof BaseFragment){
+                            ((BaseFragment) fragment).search(kw);
+                        }
+                    }
+                return true;
+            }
+        });
+
     }
 
 
@@ -119,26 +132,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return null;
     }
-        //2调用接口方法
+
+    //2调用接口方法
     @Override
     public void hideSearch() {
         search.setVisibility(View.GONE);
     }
+
     /**
      * 2 调用接口方法(保存取消)
      **/
     @Override
     public void cancelAddCinema() {
-        Fragment addCinemaFragment=fragmentSparseArray.get(R.id.bar_title_tv_add_cinema);
-        if (addCinemaFragment==null ){
+        Fragment addCinemaFragment = fragmentSparseArray.get(R.id.bar_title_tv_add_cinema);
+        if (addCinemaFragment == null) {
             return;
         }
-        Fragment cinemaFragment= fragmentSparseArray.get(R.id.bar_title_tv_view_cinema);
-        FragmentTransaction transaction=manager.beginTransaction();
-        if (cinemaFragment==null){
-            cinemaFragment=new CinemasFragment();
-            fragmentSparseArray.put(R.id.bar_title_tv_view_cinema,cinemaFragment);
-            transaction.add(R.id.fragment_container,cinemaFragment);
+        Fragment cinemaFragment = fragmentSparseArray.get(R.id.bar_title_tv_view_cinema);
+        FragmentTransaction transaction = manager.beginTransaction();
+        if (cinemaFragment == null) {
+            cinemaFragment = new CinemasFragment();
+            fragmentSparseArray.put(R.id.bar_title_tv_view_cinema, cinemaFragment);
+            transaction.add(R.id.fragment_container, cinemaFragment);
         }
         transaction.hide(addCinemaFragment).show(cinemaFragment).commit();
         tvTitle.setText(titlieArray.get(R.id.bar_title_tv_view_cinema));
@@ -146,18 +161,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void saveCinema(Cinema cinema) {
-        Fragment addCinemaFragment=fragmentSparseArray.get(R.id.bar_title_tv_add_cinema);
-        if (addCinemaFragment==null ){
+        Fragment addCinemaFragment = fragmentSparseArray.get(R.id.bar_title_tv_add_cinema);
+        if (addCinemaFragment == null) {
             return;
         }
-        Fragment cinemasFragment=fragmentSparseArray.get(R.id.bar_title_tv_view_cinema);
-        FragmentTransaction transaction=manager.beginTransaction();
-        if (cinemasFragment==null){
-            cinemasFragment =new CinemasFragment(cinema);
-            fragmentSparseArray.put(R.id.bar_title_tv_view_cinema,cinemasFragment);
-            transaction.add(R.id.fragment_container,cinemasFragment);
-        }else {
-            ((CinemasFragment)cinemasFragment).save(cinema);
+        Fragment cinemasFragment = fragmentSparseArray.get(R.id.bar_title_tv_view_cinema);
+        FragmentTransaction transaction = manager.beginTransaction();
+        if (cinemasFragment == null) {
+            cinemasFragment = new CinemasFragment(cinema);
+            fragmentSparseArray.put(R.id.bar_title_tv_view_cinema, cinemasFragment);
+            transaction.add(R.id.fragment_container, cinemasFragment);
+        } else {
+            ((CinemasFragment) cinemasFragment).save(cinema);
         }
         transaction.hide(addCinemaFragment).show(cinemasFragment).commit();
         tvTitle.setText(titlieArray.get(R.id.bar_title_tv_view_cinema));

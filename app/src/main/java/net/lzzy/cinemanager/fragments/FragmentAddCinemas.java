@@ -52,7 +52,6 @@ public class FragmentAddCinemas extends BaseFragment {
          **/
         listener.hideSearch();
 
-
         lv = find(R.id.activity_cinema_lv);
         tvArea = find(R.id.fragment_add_tv_area);
         edtName = find(R.id.fragment_add_cinema_edt_name);
@@ -85,7 +84,6 @@ public class FragmentAddCinemas extends BaseFragment {
 
                 @Override
                 public void onCancel() {
-
                 }
             });
             cityPicker.showCityPicker();
@@ -113,6 +111,11 @@ public class FragmentAddCinemas extends BaseFragment {
         return R.layout.fragment_add_cinema;
     }
 
+    @Override
+    public void search(String kw) {
+
+    }
+
     /**
      * 6 使用 接口方法  防止接口二次失效
      **/
@@ -130,7 +133,7 @@ public class FragmentAddCinemas extends BaseFragment {
         super.onAttach(context);
         try {
             listener = (OnFragmentInteractionListener) context;
-            createdListener= (onCinemaCreatedListener) context;
+            createdListener = (onCinemaCreatedListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + "必须实现OnFragmentInteractionListener&onCinemaCreatedListener");
         }
@@ -152,6 +155,7 @@ public class FragmentAddCinemas extends BaseFragment {
          * 取消
          */
         void cancelAddCinema();
+
         /**
          * 保存
          **/

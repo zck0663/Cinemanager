@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 
 import net.lzzy.cinemanager.R;
@@ -42,4 +43,5 @@ public abstract class BaseFragment extends Fragment {
         return Objects.requireNonNull(getView()).findViewById(id);
     }
 
+    public abstract void search(String kw);
 }
