@@ -1,9 +1,12 @@
 package net.lzzy.cinemanager.fragments;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -19,6 +22,7 @@ import net.lzzy.cinemanager.models.Cinema;
 import net.lzzy.cinemanager.models.CinemaFactory;
 import net.lzzy.cinemanager.models.Order;
 import net.lzzy.cinemanager.models.OrderFactory;
+import net.lzzy.cinemanager.utils.AppUtils;
 import net.lzzy.sqllib.GenericAdapter;
 import net.lzzy.sqllib.ViewHolder;
 
@@ -33,6 +37,18 @@ public class OrderFragment extends BaseFragment {
     private List<Order> orders;
     private OrderFactory factory = OrderFactory.getInstance();
     private GenericAdapter<Order> adapter;
+    private Order order;
+    private boolean isDelete;
+    private float touchX1;
+    private float touchX2;
+    private final float MIN_DElETE = 100;
+
+    public OrderFragment() {
+    }
+
+    public OrderFragment(Order order) {
+        this.order = order;
+    }
 
 
     //未重构前的写法
@@ -60,6 +76,26 @@ public class OrderFragment extends BaseFragment {
                 String location = String.valueOf(CinemaFactory.getInstance().getById(order.getCinemaId().toString()));
                 viewHolder.setTextView(R.id.order_items_name, order.getMovie())
                         .setTextView(R.id.order_items_location, location);
+                Button btn = viewHolder.getView(R.id.main_item_btn);
+                btn.setOnClickListener(v -> new AlertDialog.Builder(getContext())
+                        .setTitle("删除确认")
+                        .setMessage("确定删除吗？")
+                        .setNegativeButton("取消", null)
+                        .setPositiveButton("确认", (dialog, which) ->
+                        {
+                            isDelete = false;
+                            adapter.remove(order);
+                        })
+                        .show());
+                int visible = isDelete ? View.VISIBLE : View.GONE;
+                btn.setVisibility(visible);
+                viewHolder.getConvertView().setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        slideToDelete(event, order, btn);
+                        return true;
+                    }
+                });
             }
 
             @Override
@@ -72,7 +108,51 @@ public class OrderFragment extends BaseFragment {
                 return factory.delete(order);
             }
         };
+
         lv.setAdapter(adapter);
+        if (order != null) {
+            save(order);
+        }
+
+    }
+
+    private void slideToDelete(MotionEvent event, Order order, Button button) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                touchX1 = event.getX();
+                break;
+            case MotionEvent.ACTION_UP:
+                touchX2 = event.getX();
+                if (touchX1 - touchX2 > MIN_DElETE) {
+                    if (!isDelete) {
+                        button.setVisibility(View.VISIBLE);
+                        isDelete = true;
+                    }
+                } else {
+                    if (button.isShown()) {
+                        button.setVisibility(View.GONE);
+                        isDelete = false;
+                    } else {
+                        clickOrder(order);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void clickOrder(Order order) {
+        Cinema cinema = CinemaFactory.getInstance().getById(order.getCinemaId().toString());
+        String content = "[" + order.getMovie() + "]" + order.getMovieTime() + "\n" + cinema.toString() + "票价" + order.getPrice() + "元";
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.fragment_qrcode, null);
+        ImageView img = view.findViewById(R.id.dialog_qrcode_img);
+        img.setImageBitmap(AppUtils.createQRCodeBitmap(content, 300, 300));
+        new AlertDialog.Builder(getContext()).setView(view).show();
+    }
+
+    public void save(Order order) {
+        adapter.add(order);
     }
 
     @Override

@@ -42,7 +42,7 @@ public class FragmentAddCinemas extends BaseFragment {
 
     //3声明OnFragmentInteractionListener接口对象
     private OnFragmentInteractionListener listener;
-    //3声明onCinemaCreatedListener接口对象
+    /**3声明onCinemaCreatedListener接口对象**/
     private onCinemaCreatedListener createdListener;
 
     @Override
@@ -161,4 +161,7 @@ public class FragmentAddCinemas extends BaseFragment {
          **/
         void saveCinema(Cinema cinema);
     }
+
+
+
 }

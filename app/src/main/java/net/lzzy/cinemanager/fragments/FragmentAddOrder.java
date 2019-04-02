@@ -1,17 +1,26 @@
 package net.lzzy.cinemanager.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import net.lzzy.cinemanager.R;
 import net.lzzy.cinemanager.models.Cinema;
 import net.lzzy.cinemanager.models.CinemaFactory;
 import net.lzzy.cinemanager.models.Order;
 import net.lzzy.cinemanager.models.OrderFactory;
+import net.lzzy.cinemanager.utils.AppUtils;
 import net.lzzy.simpledatepicker.CustomDatePicker;
 
 import java.text.SimpleDateFormat;
@@ -26,6 +35,7 @@ import java.util.Locale;
  */
 public class FragmentAddOrder extends BaseFragment implements OnFragmentInteractionListener {
     private OnFragmentInteractionListener listener;
+    private onOrderCreatedListener orderCreatedListener;
     private TextView tvDate;
     private EditText etName;
     private Spinner spCinema;
@@ -35,6 +45,7 @@ public class FragmentAddOrder extends BaseFragment implements OnFragmentInteract
     private List<Cinema> cinemas;
     private OrderFactory factory = OrderFactory.getInstance();
     private CustomDatePicker picker;
+    private Order order;
 
     @Override
     protected void populate() {
@@ -44,7 +55,6 @@ public class FragmentAddOrder extends BaseFragment implements OnFragmentInteract
         edtPrice = find(R.id.fragment_add_order_price);
         spCinema = find(R.id.fragment_add_order_spinner);
         imgQRCode = find(R.id.fragment_main_Img_code);
-
         bindList();
         addListener();
         showAndOrders();
@@ -60,6 +70,8 @@ public class FragmentAddOrder extends BaseFragment implements OnFragmentInteract
         initDatePicker();
     }
 
+
+
     private void initDatePicker() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
         String now = sdf.format(new Date());
@@ -73,9 +85,56 @@ public class FragmentAddOrder extends BaseFragment implements OnFragmentInteract
         picker.setIsLoop(true);
     }
 
-
     private void addListener() {
 
+        find(R.id.fragment_add_order_btn_cancel).setOnClickListener(v -> {
+                    orderCreatedListener.cancelAddOrder();
+                }
+        );
+        find(R.id.fragment_add_order_btn_save).setOnClickListener(v -> {
+
+            String name = etName.getText().toString();
+            String strPrice = edtPrice.getText().toString();
+            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(strPrice)) {
+                Toast.makeText(getContext(), "需要完整信息", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            float price;
+            try {
+                price = Float.parseFloat(strPrice);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "价格错误", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Order order = new Order();
+            Cinema cinema = cinemas.get(spCinema.getSelectedItemPosition());
+            order.setMovieTime(tvDate.getText().toString());
+            order.setMovie(name);
+            order.setCinemaId(cinema.getId());
+            order.setPrice(price);
+            //  adapter.add(order);
+            etName.setText("");
+            orderCreatedListener.saveOrder(order);
+        });
+
+        find(R.id.fragment_add_order_btn_code).setOnClickListener(v -> {
+            String name = etName.getText().toString();
+            String price = edtPrice.getText().toString();
+            String location = spCinema.getSelectedItem().toString();
+            String time = tvDate.getText().toString();
+            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(price)) {
+                Toast.makeText(getActivity(), "需要完整信息", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String content = "[" + name + "]" + time + "\n" + location + "票价" + price + "元";
+            imgQRCode.setImageBitmap(AppUtils.createQRCodeBitmap(content, 200, 200));
+        });
+        imgQRCode.setOnLongClickListener(v -> {
+            Bitmap bitmap = ((BitmapDrawable) imgQRCode.getDrawable()).getBitmap();
+            Toast.makeText(getActivity(), AppUtils.readQRCode(bitmap), Toast.LENGTH_SHORT).show();
+            return true;
+        });
     }
 
     private void bindList() {
@@ -111,8 +170,9 @@ public class FragmentAddOrder extends BaseFragment implements OnFragmentInteract
         super.onAttach(context);
         try {
             listener = (OnFragmentInteractionListener) context;
+            orderCreatedListener = (onOrderCreatedListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + "必须实现OnFragmentInteractionListener");
+            throw new ClassCastException(context.toString() + "必须实现OnFragmentInteractionListener&onOrderCreatedListener");
         }
     }
 
@@ -121,5 +181,21 @@ public class FragmentAddOrder extends BaseFragment implements OnFragmentInteract
     public void onDestroy() {
         super.onDestroy();
         listener = null;
+        orderCreatedListener = null;
+    }
+
+    /**
+     * 1 声明接口
+     **/
+    public interface onOrderCreatedListener {
+        /**
+         * 取消
+         */
+        void cancelAddOrder();
+
+        /**
+         * 保存
+         **/
+        void saveOrder(Order order);
     }
 }

@@ -62,7 +62,7 @@ public class CinemasFragment extends BaseFragment {
         if (cinema != null) {
             save(cinema);
         }
-    }
+}
 
     public void save(Cinema cinema) {
         adapter.add(cinema);
@@ -83,4 +83,5 @@ public class CinemasFragment extends BaseFragment {
         }
         adapter.notifyDataSetChanged();
     }
+
 }

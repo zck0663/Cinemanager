@@ -21,6 +21,7 @@ import net.lzzy.cinemanager.fragments.FragmentAddOrder;
 import net.lzzy.cinemanager.fragments.OnFragmentInteractionListener;
 import net.lzzy.cinemanager.fragments.OrderFragment;
 import net.lzzy.cinemanager.models.Cinema;
+import net.lzzy.cinemanager.models.Order;
 import net.lzzy.cinemanager.utils.ViewUtils;
 
 /**
@@ -28,7 +29,7 @@ import net.lzzy.cinemanager.utils.ViewUtils;
  */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,
 
-        OnFragmentInteractionListener, FragmentAddCinemas.onCinemaCreatedListener {
+        OnFragmentInteractionListener, FragmentAddCinemas.onCinemaCreatedListener ,FragmentAddOrder.onOrderCreatedListener{
     private LinearLayout layoutMenu;
     private TextView tvTitle;
     private SearchView search;
@@ -176,5 +177,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         transaction.hide(addCinemaFragment).show(cinemasFragment).commit();
         tvTitle.setText(titlieArray.get(R.id.bar_title_tv_view_cinema));
+    }
+
+    @Override
+    public void cancelAddOrder() {
+        Fragment addOrderFragment = fragmentSparseArray.get(R.id.bar_title_tv_add_order);
+        if (addOrderFragment == null) {
+            return;
+        }
+        Fragment orderFragment = fragmentSparseArray.get(R.id.bar_title_tv_view_order);
+        FragmentTransaction transaction = manager.beginTransaction();
+        if (orderFragment == null) {
+            orderFragment = new CinemasFragment();
+            fragmentSparseArray.put(R.id.bar_title_tv_view_order, orderFragment);
+            transaction.add(R.id.fragment_container, orderFragment);
+        }
+        transaction.hide(addOrderFragment).show(orderFragment).commit();
+        tvTitle.setText(titlieArray.get(R.id.bar_title_tv_view_order));
+    }
+
+    @Override
+    public void saveOrder(Order order) {
+        Fragment addOrderFragment = fragmentSparseArray.get(R.id.bar_title_tv_add_order);
+        if (addOrderFragment == null) {
+            return;
+        }
+        Fragment ordersFragment = fragmentSparseArray.get(R.id.bar_title_tv_view_order);
+        FragmentTransaction transaction = manager.beginTransaction();
+        if (ordersFragment == null) {
+            ordersFragment = new OrderFragment(order);
+            fragmentSparseArray.put(R.id.bar_title_tv_view_order, ordersFragment);
+            transaction.add(R.id.fragment_container, ordersFragment);
+        } else {
+            ((OrderFragment)ordersFragment).save(order);
+        }
+        transaction.hide(addOrderFragment).show(ordersFragment).commit();
+        tvTitle.setText(titlieArray.get(R.id.bar_title_tv_view_order));
     }
 }
