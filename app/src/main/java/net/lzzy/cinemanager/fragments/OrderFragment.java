@@ -2,6 +2,7 @@ package net.lzzy.cinemanager.fragments;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,6 +34,7 @@ import java.util.List;
  * Description:
  */
 public class OrderFragment extends BaseFragment {
+    public static final String ORDER = "order";
     private ListView lv;
     private List<Order> orders;
     private OrderFactory factory = OrderFactory.getInstance();
@@ -42,14 +44,24 @@ public class OrderFragment extends BaseFragment {
     private float touchX1;
     private float touchX2;
     private final float MIN_DElETE = 100;
-
-    public OrderFragment() {
+    //region静态工厂方法传递数据
+    public static OrderFragment newInstance(Order order) {
+        OrderFragment fragment = new OrderFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(ORDER, order);
+        fragment.setArguments(args);
+        return fragment;
     }
 
-    public OrderFragment(Order order) {
-        this.order = order;
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            Order order = getArguments().getParcelable(ORDER);
+            this.order = order;
+        }
     }
-
+    //endregion
 
     //未重构前的写法
 //    public OrderFragment(){}
@@ -162,6 +174,12 @@ public class OrderFragment extends BaseFragment {
 
     @Override
     public void search(String kw) {
-
+        orders.clear();
+        if (TextUtils.isEmpty(kw)) {
+            orders.addAll(factory.get());
+        } else {
+            orders.addAll(factory.searchOrders(kw));
+        }
+        adapter.notifyDataSetChanged();
     }
 }
